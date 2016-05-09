@@ -41,7 +41,7 @@ FILES_${PN}-java = "${libdir}/libjava*.so \
                     ${prefix}/src/debug/${BPN}/${PV}-${PR}/build/src/*/*javaupm_* \
                     ${libdir}/.debug/libjava*.so \
                    "
-RDEPENDS_${PN}-java += "java-runtime mraa-java"
+RDEPENDS_${PN}-java += "java2-runtime mraa-java"
 INSANE_SKIP_${PN}-java = "debug-files"
 
 
@@ -64,4 +64,3 @@ set (JAVA_INCLUDE_PATH2 ${JAVA_HOME}/include/linux CACHE PATH \"java include pat
 set (JAVA_JVM_LIBRARY ${JAVA_HOME}/jre/lib/amd64/libjvm.so CACHE FILEPATH \"path to JVM\" FORCE)
 " >> ${WORKDIR}/toolchain.cmake
 }
-
