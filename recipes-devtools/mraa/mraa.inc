@@ -9,7 +9,14 @@ S = "${WORKDIR}/git"
 
 inherit distutils-base pkgconfig python-dir cmake
 
-PACKAGES =+ "python-${PN} node-${PN} ${PN}-java"
+# override this in local.conf to get a subset of bindings.
+# BINDINGS_pn-mraa="python"
+# will result in only the python bindings being built/packaged.
+BINDINGS ?= "python nodejs java"
+
+PACKAGES =+ "${@bb.utils.contains('BINDINGS', 'java', '${PN}-java', '', d)}"
+PACKAGES =+ "${@bb.utils.contains('BINDINGS', 'nodejs', 'node-${PN}', '', d)}"
+PACKAGES =+ "${@bb.utils.contains('BINDINGS', 'python', 'python-${PN}', '', d)}"
 
 # python-mraa package containing Python bindings
 FILES_python-${PN} = "${PYTHON_SITEPACKAGES_DIR}/ \
@@ -35,13 +42,18 @@ FILES_${PN}-java = "${libdir}/libmraajava.so \
                     ${libdir}/.debug/libmraajava.so \
                    "
 
-RDEPENDS_${PN}-java += "java2-runtime"
+RDEPENDS_${PN}-java += "${@bb.utils.contains('PACKAGES', '${PN}-java', 'java2-runtime', '', d)}"
 INSANE_SKIP_${PN}-java = "debug-files"
 
 
 FILES_${PN}-doc += "${datadir}/mraa/examples/"
 
-PACKAGECONFIG ??= "python nodejs java"
+PACKAGECONFIG ??= "${@bb.utils.contains('PACKAGES', 'node-${PN}', 'nodejs', '', d)} \
+ ${@bb.utils.contains('PACKAGES', 'python-${PN}', 'python', '', d)} \
+ ${@bb.utils.contains('PACKAGES', '${PN}-java', 'java', '', d)}"
+
+
+
 PACKAGECONFIG[python] = "-DBUILDSWIGPYTHON=ON, -DBUILDSWIGPYTHON=OFF, swig-native python,"
 PACKAGECONFIG[nodejs] = "-DBUILDSWIGNODE=ON, -DBUILDSWIGNODE=OFF, swig-native nodejs,"
 PACKAGECONFIG[java] = "-DBUILDSWIGJAVA=ON, -DBUILDSWIGJAVA=OFF, swig-native icedtea7-native,"
